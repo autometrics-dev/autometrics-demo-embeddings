@@ -1,6 +1,9 @@
 # Environments
 .env
 
+# Autometrics cli data
+.autometrics
+
 # IDEs
 .vscode
 

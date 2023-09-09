@@ -1,8 +1,9 @@
 version: "3.9"
 services:
-  # === Postgres DB === #
+  # === Postgres DB with vector extension === #
   db:
-    image: postgres:latest
+    # image: ankane/pgvector
+    build: ./db
     container_name: autometrics_demo_db
     environment:
       POSTGRES_PASSWORD: autometrics
@@ -12,11 +13,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
   # === Main Node.js API === #
   api:
     build: ./api
+    mem_limit: 512m
     ports:
       - "${FP_API_PORT:-8081}:8080"
+      - "9464:9464"
     environment:
       POSTGRES_PASSWORD: autometrics
       POSTGRES_USER: autometrics
@@ -25,11 +29,15 @@ services:
       - ./.env
     volumes:
       - ./api/public:/app/public
-  
+
+  # === Python embeddings service === #
   embeddings:
     build: ./embeddings
+    mem_limit: 1g
     ports:
       - "${FP_EMBEDDINGS_PORT:-8082}:5000"
+    environment:
+      AUTOMETRICS_TRACKER: prometheus 
     env_file:
       - ./.env
 

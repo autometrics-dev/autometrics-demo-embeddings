@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { Pool } from "pg";
+
 // import path from "path";
 // import { fileURLToPath } from "url";
 
@@ -16,7 +17,34 @@ const pool = new Pool({
 });
 
 export const main = async () => {
-  console.log("Starting api (proxy for /metrics, etc)...");
+  try {
+    // Create the pgvector extension
+    await pool.query("CREATE EXTENSION IF NOT EXISTS vector;");
+
+    // Create a table to contain vectors
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS embeddings_results (
+        id SERIAL PRIMARY KEY,
+        original_text TEXT NOT NULL,
+        embeddings VECTOR(768) NOT NULL -- Assuming BERT-base embeddings, which are of length 768
+      );
+    `);
+
+    console.log("Database setup completed.");
+  } catch (error) {
+    console.error("Error setting up the database:", error);
+  }
+
+  console.log("Starting api...");
+
+  // HACK - import autometrics after the server starts due to module interoperability issues
+  const { autometrics } = await import("@autometrics/autometrics");
+  const { init } = await import("@autometrics/exporter-prometheus");
+
+  // Initialize the Prometheus exporter, expose /metrics on port 9464
+  init({
+    port: 9464,
+  });
 
   const app = express();
 
@@ -43,7 +71,10 @@ export const main = async () => {
     }
   });
 
-  app.post("/api/generate-embeddings", async (req, res) => {
+  const generateEmbeddings = autometrics(async function generateEmbeddings(
+    req,
+    res
+  ) {
     const data = await fetch("http://embeddings:5000/embeddings", {
       method: "POST",
       headers: {
@@ -56,6 +87,8 @@ export const main = async () => {
     const json = await data.json();
     res.json(json);
   });
+
+  app.post("/api/generate-embeddings", generateEmbeddings);
 
   // Serve the index.html file for all other routes
   app.get("*", (req, res) => {

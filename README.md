@@ -2,7 +2,11 @@
 
 > **THIS IS A WORK IN PROGRESS!**
 
-Run with `docker compose up --build`.
+- Run all services `docker compose up --build`
+- Check the UI is running at `http://localhost:8080`
+- Start prometheus `am start :8082`
+- Generate load `k6 run load/load-test.js`
+- View metrics at `http://localhost:6789`
 
 ## Scenario
 
@@ -13,6 +17,7 @@ The service is composed of two components:
 - A node.js web server that serves a simple HTML form, and accepts POST requests to `/generate-embeddings` with a `text` parameter in the body.
 
 - A python service that accepts POST requests to `/embeddings` with a `text` parameter in the body, and returns a JSON response with the embeddings.
+
 
 
 ## TODO
