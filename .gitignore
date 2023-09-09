@@ -1,6 +1,15 @@
+# Environments
 .env
+
+# IDEs
+.vscode
+
+# Node
 node_modules
-.DS_Store
+
+# Python
 venv
 __pycache__
-.vscode
+
+# macOS
+.DS_Store
