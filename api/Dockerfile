@@ -4,7 +4,6 @@ WORKDIR /app
 
 COPY *.json ./
 COPY src ./src/
-COPY entrypoint.sh ./
 
 # NOTE - For now, we rely on the host to mount the public directory
 #
@@ -12,4 +11,6 @@ COPY entrypoint.sh ./
 
 RUN npm install
 
-ENTRYPOINT ["/bin/bash", "entrypoint.sh"]
+RUN npm run build
+
+CMD [ "npm", "start" ]

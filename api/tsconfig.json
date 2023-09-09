@@ -9,7 +9,7 @@
     "downlevelIteration": true,
     "lib": [
       "ES2022",
-      "dom"
+      "DOM"
     ],
     "module": "NodeNext",
     "noUnusedLocals": true,
@@ -18,7 +18,7 @@
     "strict": true,
     "target": "ES2022",
     "rootDir": "./src",
-    "outDir": "./ts",
+    "outDir": "./dist",
     "baseUrl": "./"
   },
   "include": [
