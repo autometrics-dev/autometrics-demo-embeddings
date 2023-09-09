@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "resolveJsonModule": true,
+    "removeComments": true,
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+    "lib": [
+      "ES2022",
+      "dom"
+    ],
+    "module": "NodeNext",
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "noUncheckedIndexedAccess": true,
+    "strict": true,
+    "target": "ES2022",
+    "rootDir": "./src",
+    "outDir": "./ts",
+    "baseUrl": "./"
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "examples"
+  ]
+}

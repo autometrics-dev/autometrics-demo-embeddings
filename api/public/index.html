@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My Embeddings App</title>
+</head>
+
+<body>
+  <h1>Welcome to my Embeddings app!</h1>
+  <p>This is a simple interface to generate embeddings via BERT.</p>
+
+    <form>
+      <label for="text">Enter some text:</label><br>
+      <textarea id="text" name="text" rows="10" cols="50"></textarea><br>
+      <button type="submit">Submit</button>
+    </form>
+    
+    <script>
+      const form = document.querySelector("form");
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const text = document.querySelector("#text").value;
+        const response = await fetch("/api/generate-embeddings", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text })
+        });
+        const embeddings = await response.json();
+        console.log(embeddings);
+      });
+    </script>
+</body>
+
+</html>
