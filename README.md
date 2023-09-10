@@ -4,9 +4,27 @@
 
 - Start all services `docker compose up --build`
 - Check the UI is running at `http://localhost:8081`
-- Start prometheus `am start :8082 :9464`
-- Generate load `k6 run load/load-test.js`
+- Start Prometheus and scrape the services `am start :8082 :9464`
+- Generate load on the api `k6 run load/load-test.js`
 - View metrics at `http://localhost:6789`
+
+If you don't want to install `am` or `k6` locally, you can run them via Docker as well.
+
+To run `am` in a container:
+
+```sh
+docker run \
+  --network host
+  -e LISTEN_ADDRESS=0.0.0.0:6789 \
+  -p 6789:6789 \
+  autometrics/am start :8082 :9464
+```
+
+To run `k6` from a container:
+
+```sh
+docker run --rm -i grafana/k6 run --vus 10 --duration 30s - <load/load-test.js
+```
 
 ### Dependencies
 
