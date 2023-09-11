@@ -1,17 +1,17 @@
 from flask import Flask, request, jsonify, Response
 from transformers import AutoTokenizer, AutoModel
-from autometrics import autometrics, init, Objective, ObjectiveLatency, ObjectivePercentile
+from autometrics import autometrics
+from autometrics.objectives import Objective, ObjectiveLatency, ObjectivePercentile
 from prometheus_client import generate_latest
 
-VERSION="0.0.1"
 
 app = Flask(__name__)
 
-init(version=VERSION)
+# init(version=VERSION, tracker="prometheus")
 
 NLP_SLO = Objective(
     "nlp",
-    latency=(ObjectiveLatency.Ms200, ObjectivePercentile.P99),
+    latency=(ObjectiveLatency.Ms250, ObjectivePercentile.P99),
 )
 
 # Set up the tokenizer and model for creating BERT embeddings
@@ -34,7 +34,7 @@ def embeddings():
     embeddings = outputs.last_hidden_state.mean(dim=1).tolist()[0]
     return jsonify(embeddings)
 
-@app.route("/is-hotdog", methods=["GET"])
+@app.route("/is-hotdog", methods=["POST"])
 @autometrics(objective=NLP_SLO)
 def is_hotdog():
     data = request.json

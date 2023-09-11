@@ -13,21 +13,48 @@ export let options = {
 };
 
 export default function () {
-  let url = "http://localhost:8081/api/generate-embeddings";
-  let payload = JSON.stringify({
-    text: "Embed this text please!",
-  });
 
-  let params = {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
+  checkNodeJsEmbeddingsApi();
+  checkPythonIsHotDogApi();
+  checkPythonIsHotDogApi();
 
-  let response = http.post(url, payload, params);
+  function checkNodeJsEmbeddingsApi() {
+    let url = "http://localhost:8081/api/generate-embeddings";
+    let payload = JSON.stringify({
+      text: "Embed this text please!",
+    });
 
-  check(response, {
-    "Status was 200": (r) => r.status === 200,
-    "Transaction time OK": (r) => r.timings.duration < 200, // adjust this based on expected performance
-  });
+    let params = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    let response = http.post(url, payload, params);
+
+    check(response, {
+      "Status was 200": (r) => r.status === 200,
+      "Transaction time OK": (r) => r.timings.duration < 200, // adjust this based on expected performance
+    });
+  }
+
+    function checkPythonIsHotDogApi() {
+      let url = "http://localhost:8082/is-hotdog";
+      let payload = JSON.stringify({
+        text: "not hotdog",
+      });
+
+      let params = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      let response = http.post(url, payload, params);
+
+      check(response, {
+        "Status was 200": (r) => r.status === 200,
+        "Transaction time OK": (r) => r.timings.duration < 200, // adjust this based on expected performance
+      });
+    }
 }

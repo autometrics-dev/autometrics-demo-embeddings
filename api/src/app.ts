@@ -14,12 +14,13 @@ const __dirname = path.dirname(__filename);
 
 const PORT = 8080;
 
+// Initialize the Prometheus exporter, expose /metrics on port 9464
+console.log("Initializing autometrics...");
+init({ port: 9464 });
+
 console.log("Setting up db...");
 await setupDatabase();
 console.log("Database initialized!");
-
-// Initialize the Prometheus exporter, expose /metrics on port 9464
-init({ port: 9464 });
 
 const app = express();
 

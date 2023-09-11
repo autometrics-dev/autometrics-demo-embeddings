@@ -4,7 +4,6 @@ services:
   db:
     # image: ankane/pgvector
     build: ./db
-    container_name: autometrics_demo_db
     environment:
       POSTGRES_PASSWORD: autometrics
       POSTGRES_USER: autometrics
@@ -37,6 +36,7 @@ services:
     ports:
       - "${FP_EMBEDDINGS_PORT:-8082}:5000"
     environment:
+      AUTOMETRICS_VERSION: 0.0.1
       AUTOMETRICS_TRACKER: prometheus 
     env_file:
       - ./.env

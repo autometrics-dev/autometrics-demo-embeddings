@@ -57,7 +57,8 @@ export const saveEmbeddings = autometrics(
   }) {
     await pool.query(
       "INSERT INTO embeddings_results (original_text, embeddings) VALUES ($1, $2)",
-      [originalText, embeddings]
+      // NOTE - JSON stringify is used here to convert the embeddings array to a format that postgres understands
+      [originalText, JSON.stringify(embeddings)]
     );
   }
 );
