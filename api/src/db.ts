@@ -1,4 +1,7 @@
+import { autometrics } from "@autometrics/autometrics";
 import pg from "pg";
+
+import { API_SLO } from "./instrumentation.js";
 
 const { Pool } = pg;
 
@@ -30,20 +33,31 @@ export async function setupDatabase() {
   }
 }
 
-export async function getEmbeddings() {
-  const { rows } = await pool.query("SELECT * FROM embeddings_results");
-  return rows;
-}
+export const getEmbeddings = autometrics(
+  {
+    objective: API_SLO,
+  },
+  async function getEmbeddings() {
+    const { rows } = await pool.query("SELECT * FROM embeddings_results");
+    return rows;
+  }
+);
 
-export async function saveEmbeddings({
-  originalText,
-  embeddings,
-}: {
-  originalText: string;
-  embeddings: number[];
-}) {
-  await pool.query(
-    "INSERT INTO embeddings_results (original_text, embeddings) VALUES ($1, $2)",
-    [originalText, embeddings]
-  );
-}
+
+export const saveEmbeddings = autometrics(
+  {
+    objective: API_SLO,
+  },
+  async function saveEmbeddings({
+    originalText,
+    embeddings,
+  }: {
+    originalText: string;
+    embeddings: number[];
+  }) {
+    await pool.query(
+      "INSERT INTO embeddings_results (original_text, embeddings) VALUES ($1, $2)",
+      [originalText, embeddings]
+    );
+  }
+);

@@ -1,16 +1,12 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import {
-  autometrics,
-  Objective,
-  ObjectiveLatency,
-  ObjectivePercentile,
-} from "@autometrics/autometrics";
+import { autometrics } from "@autometrics/autometrics";
 import { init } from "@autometrics/exporter-prometheus";
 import { fileURLToPath } from "url";
 
 import { setupDatabase, getEmbeddings, saveEmbeddings } from "./db.js";
+import { API_SLO } from "./instrumentation.js";
 
 // Polyfill __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -20,19 +16,10 @@ const PORT = 8080;
 
 console.log("Setting up db...");
 await setupDatabase();
-
-console.log("Starting api...");
-
-const API_SLO: Objective = {
-  name: "api",
-  successRate: ObjectivePercentile.P99_9,
-  latency: [ObjectiveLatency.Ms100, ObjectivePercentile.P99],
-};
+console.log("Database initialized!");
 
 // Initialize the Prometheus exporter, expose /metrics on port 9464
-init({
-  port: 9464,
-});
+init({ port: 9464 });
 
 const app = express();
 
@@ -45,7 +32,6 @@ app.use(express.json());
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-// TODO - save embeddings to database
 app.get("/api/embeddings", async (req, res) => {
   try {
     const result = await getEmbeddings();
@@ -67,24 +53,30 @@ app.post("/api/embeddings", async (req, res) => {
   }
 });
 
-const generateEmbeddings = autometrics(
+const generateEmbeddingsHandler = autometrics(
   { objective: API_SLO },
-  async function generateEmbeddings(req, res) {
+  async function generateEmbeddingsHandler(req, res) {
+    const originalText = req.body.text;
     const data = await fetch("http://embeddings:5000/embeddings", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        text: req.body.text,
+        text: originalText,
       }),
     });
     const json = await data.json();
+    try {
+      await saveEmbeddings({ originalText, embeddings: json });
+    } catch (error) {
+      console.error("Error saving embeddings!", error);
+    }
     res.json(json);
   }
 );
 
-app.post("/api/generate-embeddings", generateEmbeddings);
+app.post("/api/generate-embeddings", generateEmbeddingsHandler);
 
 // Serve the index.html file for all other routes
 app.get("*", (req, res) => {

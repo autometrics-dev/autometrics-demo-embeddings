@@ -2,11 +2,13 @@
 
 ## Quickstart
 
-- Start all services `docker compose up --build`
+- `docker compose up --build` - Start all services 
 - Check the UI is running at `http://localhost:8081`
-- Start Prometheus and scrape the services `am start :8082 :9464`
-- Generate load on the api `k6 run load/load-test.js`
-- View metrics at `http://localhost:6789`
+- `am start :8082 :9464` - Start Prometheus and scrape the services 
+- `k6 run load/load-test.js` - Generate load on the api 
+- View some metrics - `http://localhost:6789`
+- Make a coffee (let the load test run for 6 minutes)
+- Check the alerts - `http://localhost:6789/explorer#/alerts`
 
 If you don't want to install `am` or `k6` locally, you can run them via Docker as well.
 
@@ -38,15 +40,15 @@ This is a setup for a demo service that generates embeddings from some input tex
 
 The service has three components:
 
-- A python service that accepts POST requests to `/embeddings` with a `text` parameter in the body, and returns a JSON response with BERT embeddings.
+- A python service that accepts POST requests to the route `/embeddings` with a `text` parameter in the body. It returns a JSON response with BERT embeddings of the `text`.
 
-- A node.js web server that serves a simple HTML form, and accepts POST requests to `/generate-embeddings` with a `text` parameter in the body.
+- A node.js web server that serves a simple HTML form, and accepts POST requests to `/generate-embeddings` with a `text` parameter in the body. It uses the python service to generate the embeddings, and returns a JSON response with the embeddings.
 
 - A postgres database that can store the embeddings (_not yet integrated_)
 
 The python and node services are instrumented with the `autometrics` library, and the `am` CLI tool is used to start a prometheus server that collects metrics from the services.
 
-Optionally, the `k6` CLI tool is used to generate load on the services.
+Optionally, the `k6` CLI tool can be used to generate load on the services, which will make the `am` explorer UI far more fun to look at.
 
 ### Service Level Objectives and Alerts
 
