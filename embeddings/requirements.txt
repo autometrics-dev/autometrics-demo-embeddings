@@ -5,7 +5,7 @@ charset-normalizer==3.2.0
 click==8.1.7
 Deprecated==1.2.14
 filelock==3.12.3
-Flask==2.3.3
+Flask[async]==2.3.3
 fsspec==2023.9.0
 huggingface-hub==0.16.4
 idna==3.4
@@ -27,6 +27,7 @@ PyYAML==6.0.1
 regex==2023.8.8
 requests==2.31.0
 safetensors==0.3.3
+scipy==1.11.3
 sympy==1.12
 tokenizers==0.13.3
 torch==2.0.1

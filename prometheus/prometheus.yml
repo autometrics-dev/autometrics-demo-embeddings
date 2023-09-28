@@ -20,7 +20,7 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       # NOTE - We use the project name from docker compose as well as the *container* port for the push gateway
-      - targets: ["api:8080"]
+      - targets: ["api:9464"]
 
   - job_name: "python-api"
     # Override the global default and scrape targets from this job every 5 seconds.

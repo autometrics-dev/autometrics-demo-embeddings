@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify, Response
 from transformers import AutoTokenizer, AutoModel
+from scipy.spatial.distance import cosine
 from autometrics import autometrics
 from autometrics.objectives import Objective, ObjectiveLatency, ObjectivePercentile
 from prometheus_client import generate_latest
-
+from hotdog import HOTDOG_EMBEDDING
 
 app = Flask(__name__)
 
@@ -13,6 +14,10 @@ NLP_SLO = Objective(
     "nlp",
     latency=(ObjectiveLatency.Ms250, ObjectivePercentile.P99),
 )
+
+def compare_embeddings(embedding1, embedding2):
+    similarity = 1 - cosine(embedding1, embedding2)
+    return similarity
 
 # Set up the tokenizer and model for creating BERT embeddings
 tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
@@ -26,7 +31,7 @@ def metrics():
 
 @app.route("/embeddings", methods=["POST"])
 @autometrics(objective=NLP_SLO)
-def embeddings():
+async def embeddings():
     data = request.json
     text = data["text"]
     inputs = tokenizer(text, return_tensors="pt")
@@ -36,20 +41,24 @@ def embeddings():
 
 @app.route("/is-hotdog", methods=["POST"])
 @autometrics(objective=NLP_SLO)
-def is_hotdog():
+async def is_hotdog():
     data = request.json
     text = data["text"]
     is_hotdog = text == "hotdog"
     return jsonify({ "is_hotdog": is_hotdog })
 
-@app.route("/", methods=["GET"])
+# Takes a BERT embedding and compares it to the BERT embedding for "hotdog"
+@app.route("/is-hotdogish", methods=["POST"])
 @autometrics(objective=NLP_SLO)
-def home():
-    text = "test123"
-    inputs = tokenizer(text, return_tensors="pt")
-    outputs = model(**inputs)
-    embeddings = outputs.last_hidden_state.mean(dim=1).tolist()[0]
-    return jsonify(embeddings)
+async def is_hotdogish():
+    data = request.json
+    potential_hotdog_embedding = data["embedding"]
+    distance = compare_embeddings(HOTDOG_EMBEDDING, potential_hotdog_embedding)
+    print("DISTANCE", distance)
+    # NOTE - need to convert numpy bool to native python bool
+    is_hotdogish = bool(distance >= 0.92)
+    return jsonify({ "is_hotdogish": is_hotdogish })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
