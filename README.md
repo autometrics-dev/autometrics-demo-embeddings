@@ -30,9 +30,13 @@ docker run --rm -i grafana/k6 run --vus 10 --duration 30s - <load/load-test.js
 
 ### Dependencies
 
-- Docker
+You need a few tools installed on your system to run this demo:
+
+- Docker and Docker Compose
 - `am` CLI tool (`brew install autometrics-dev/tap/am`)
 - `k6` CLI tool (`brew install k6`)
+
+If you don't want to install `am` or `k6`, you can also run them via Docker (see instructions above)
 
 ## Description
 
@@ -40,9 +44,9 @@ This is a setup for a demo service that generates embeddings from some input tex
 
 The service has three components:
 
-- A python service that accepts POST requests to the route `/embeddings` with a `text` parameter in the body. It returns a JSON response with BERT embeddings of the `text`.
+- A node.js web server that serves a simple HTML form, and accepts POST requests to `/generate-embeddings` with a `text` parameter in the body. It calls a python service (described below) to generate the embeddings, and returns a JSON response with the embeddings.
 
-- A node.js web server that serves a simple HTML form, and accepts POST requests to `/generate-embeddings` with a `text` parameter in the body. It uses the python service to generate the embeddings, and returns a JSON response with the embeddings.
+- A python service that accepts POST requests to the route `/embeddings` with a `text` parameter in the body. It returns a JSON response with BERT embeddings of the provided `text`.
 
 - A postgres database that can store the embeddings (_not yet integrated_)
 

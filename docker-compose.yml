@@ -35,11 +35,75 @@ services:
     mem_limit: 1g
     ports:
       - "${FP_EMBEDDINGS_PORT:-8082}:5000"
+      - "9100:9100" # node exporter
     environment:
       AUTOMETRICS_VERSION: 0.0.1
       AUTOMETRICS_TRACKER: prometheus 
     env_file:
       - ./.env
 
+  # === Prometheus === #
+  prom:
+    image: prom/prometheus
+    entrypoint: /bin/prometheus
+      --enable-feature=exemplar-storage
+      --config.file=/etc/prometheus/prometheus.yml
+      --storage.tsdb.path=/prometheus
+      --web.console.libraries=/usr/share/prometheus/console_libraries
+      --web.console.templates=/usr/share/prometheus/consoles
+    ports:
+      - "9099:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus/autometrics.rules.yml:/etc/prometheus/autometrics.rules.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  # === Grafana === #
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "9011:9011"
+    # FIXME - Because the dashboard json require an input to populate "uid": "${DS_PROMETHEUS}" field,
+    #         we cannot autoload autometrics dashboards from this path, unfortunately!
+    # environment:
+    #   GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: "/var/lib/grafana/dashboards/Autometrics Overview.json"
+    environment:
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: "/var/lib/grafana/dashboards/Embeddings Node Exporter.json"
+
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      # FIXME - This encounters the same error described above re: autoloading dashboards
+      #
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    platform: linux/aarch64 # NOTE - to support m1 or m2 mac
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    privileged: true
+    volumes:
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
+    # command:
+    #   - '--disable_metrics=percpu'
+    # volumes:
+    #   - /:/rootfs:ro
+    #   - /var/run:/var/run:ro
+    #   - /sys:/sys:ro
+    #   - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8089:8080"
+
 volumes:
   postgres_data:
+  prometheus_data:
+  grafana_data:

@@ -1,13 +1,15 @@
 import http from "k6/http";
-import { check } from "k6";
+import { check, sleep } from "k6";
 
 // NOTE - 10vus will absolutely destroy the python service
-//        1vu seems to be alright for latency under 200ms
+// 
+//        1vu seems to be alright for latency that averages around 100ms,
+//        provided there's a 10ms sleep in the default function.
 //
 export let options = {
   stages: [
-    { duration: "2m", target: 1 }, // ramp up to 2 VUs during the first minute
-    { duration: "3m", target: 1 }, // stay at 2 VUs for 3 minutes
+    { duration: "2m", target: 1 }, // TODO - could ramp up to two VUs here and then stay at 2 VUs for the next stage
+    { duration: "3m", target: 1 },
     { duration: "1m", target: 0 }, // ramp down to 0 VUs during the last minute
   ],
 };
@@ -56,5 +58,8 @@ export default function () {
         "Status was 200": (r) => r.status === 200,
         "Transaction time OK": (r) => r.timings.duration < 200, // adjust this based on expected performance
       });
+
+      // Sleep for 10ms
+      sleep(0.01)
     }
 }
