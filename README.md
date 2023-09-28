@@ -62,3 +62,13 @@ The node.js api has two SLOs:
 - 99% of API requests should return in under 100ms
 
 After running the load test, which takes around 6 minutes, there should be alerts in the `am` explorer UI (at `http://localhost:6789/explorer#/alerts`) for the latency SLO.
+
+
+## Extras (experimental)
+
+### Grafana
+
+Access Grafana via http://localhost:9011.
+
+There you'll find a dashboard with some basic metrics about containers on your system (thanks to cAdvisor). Look for the `autometrics-demo-embeddings-embeddings-1` container.
+

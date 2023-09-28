@@ -10,8 +10,8 @@ export let options = {
   stages: [
     { duration: "1m", target: 1 },
     { duration: "3m", target: 5 },
-    { duration: "2m", target: 8 },
-    { duration: "1m", target: 2 },
+    { duration: "3m", target: 8 },
+    { duration: "2m", target: 2 },
     { duration: "1m", target: 0 }, // ramp down to 0 VUs during the last minute
   ],
 };
@@ -19,6 +19,7 @@ export let options = {
 export default function () {
   checkNodeJsEmbeddingsApi();
   checkPythonIsHotDogApi();
+  checkPythonIsHotDogishApi();
   checkPythonIsHotDogishApi();
   // Sleep for 5ms
   sleep(0.005);
