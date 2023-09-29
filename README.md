@@ -2,27 +2,13 @@
 
 ## Quickstart
 
-- `docker compose up --build` - Start all services 
-- Check the UI is running at `http://localhost:8081`
-- `am start :8082 :9464` - Start Prometheus and scrape the services 
-- `k6 run load/load-test.js` - Generate load on the api 
-- View some metrics - `http://localhost:6789`
-- Make a coffee (let the load test run for 6 minutes)
-- Check the alerts - `http://localhost:6789/explorer#/alerts`
+- Start all services - `docker compose up --build`
+- Generate load on the api - `k6 run load/load-test.js`
+- View some metrics - `http://localhost:6788`
+- Make a coffee  - Let the load test run for at least 5 minutes
+- Check the alerts - `http://localhost:6788/explorer#/alerts`
 
-If you don't want to install `am` or `k6` locally, you can run them via Docker as well.
-
-To run `am` in a container:
-
-```sh
-docker run \
-  --network host
-  -e LISTEN_ADDRESS=0.0.0.0:6789 \
-  -p 6789:6789 \
-  autometrics/am start :8082 :9464
-```
-
-To run `k6` from a container:
+If you don't want to install `k6` locally, you can run it via Docker as well:
 
 ```sh
 docker run --rm -i grafana/k6 run --vus 10 --duration 30s - <load/load-test.js
@@ -33,10 +19,7 @@ docker run --rm -i grafana/k6 run --vus 10 --duration 30s - <load/load-test.js
 You need a few tools installed on your system to run this demo:
 
 - Docker and Docker Compose
-- `am` CLI tool (`brew install autometrics-dev/tap/am`)
 - `k6` CLI tool (`brew install k6`)
-
-If you don't want to install `am` or `k6`, you can also run them via Docker (see instructions above)
 
 ## Description
 
@@ -50,9 +33,9 @@ The service has three components:
 
 - A postgres database that can store the embeddings (_not yet integrated_)
 
-The python and node services are instrumented with the `autometrics` library, and the `am` CLI tool is used to start a prometheus server that collects metrics from the services.
+The python and node services are instrumented with the `autometrics` library. Their metrics data can be visualized with the Autometrics Explorer UI, which is available at `http://localhost:6788`.
 
-Optionally, the `k6` CLI tool can be used to generate load on the services, which will make the `am` explorer UI far more fun to look at.
+Optionally, the `k6` CLI tool can be used to generate load on the services, which will make the autometrics explorer UI far more fun to look at.
 
 ### Service Level Objectives and Alerts
 
@@ -64,11 +47,28 @@ The node.js api has two SLOs:
 After running the load test, which takes around 6 minutes, there should be alerts in the `am` explorer UI (at `http://localhost:6789/explorer#/alerts`) for the latency SLO.
 
 
-## Extras (experimental)
+## Extras
+
+The Docker Compose file also starts a few other services for monitoring. Most of these are started on nonstandard ports to avoid conflicts with other services you may have running on your system.
+
+### Prometheus
+
+Access Prometheus via http://localhost:9099.
+
+### Autometrics Explorer
+
+Access the Autometrics Explorer via http://localhost:6789/explorer.
 
 ### Grafana
 
 Access Grafana via http://localhost:9011.
 
 There you'll find a dashboard with some basic metrics about containers on your system (thanks to cAdvisor). Look for the `autometrics-demo-embeddings-embeddings-1` container.
+
+### cAdvisor
+
+Access cAdvistor via http://localhost:8088.
+
+Container metrics are made available via cAdvisor. However, the configuration to get these metrics is specific to running on an M1/M2 macbook.
+
 
